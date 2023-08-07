@@ -1,7 +1,8 @@
 const { Router } = require("express");
-const passport = require("passport");
+const { authToken } = require("../middleware/auth-token.middleware");
 const userModel = require("../model/user.model");
 const { createHashValue, isValidPasswd } = require("../utils/encrypt");
+const { generateJWT } = require("../utils/jwt");
 
 const router = Router();
 
@@ -12,27 +13,46 @@ router.get("/logout", async (req, res) => {
   });
 });
 
-router.post("/login", async (req, res) => {
+router.get("/private", authToken, async (req, res) => {
+  try {
+    const decodedToken = req.user;
+    console.log(
+      "🚀 ~ file: session.routes.js:18 ~ router.get ~ decodedToken:",
+      decodedToken
+    );
+    const token = req.token;
+    console.log("🚀 ~ file: session.routes.js:23 ~ router.get ~ token:", token);
+    return res.json({ token, decodedToken });
+  } catch (error) {
+    console.log("🚀 ~ file: session.routes.js:27 ~ router.get ~ error:", error);
+  }
+});
+
+// PROBAR ESTE LOGIN CON POSTMAN
+// TODO: QUITAR AUTHTOKEN y llamada de verificacion
+router.post("/login", authToken, async (req, res) => {
   try {
     const { email, password } = req.body;
-    const findUser = await userModel.findOne({ email });
+    const findUser = req?.user || (await userModel.findOne({ email }));
 
     if (!findUser) {
-      return res.json({ message: `este usuario no esta registrado` });
+      return res
+        .status(401)
+        .json({ message: `este usuario no esta registrado` });
     }
     const isValidComparePsw = await isValidPasswd(password, findUser.password);
     if (!isValidComparePsw) {
-      return res.json({ message: `password incorrecto` });
+      return res.status(401).json({ message: `credenciales invalidas` });
     }
 
     req.session.user = {
       ...findUser,
     };
 
-    return res.render("profile", {
-      last_name: req.session?.user?.last_name || findUser.last_name,
-      email: req.session?.user?.email || email,
-      age: req.session?.user?.age || findUser.age,
+    const token = req.token;
+    return res.json({
+      user: findUser,
+      token,
     });
   } catch (error) {
     console.log(
@@ -58,12 +78,14 @@ router.post("/register", async (req, res) => {
       password: pswHashed,
     };
     const newUser = await userModel.create(userAdd);
+
+    const token = await generateJWT(newUser);
     console.log(
-      "🚀 ~ file: session.routes.js:61 ~ router.post ~ newUser:",
-      newUser
+      "🚀 ~ file: session.routes.js:63 ~ router.post ~ token:",
+      token
     );
 
-    req.session.user = { email, first_name, last_name, age };
+    req.session.user = { email, first_name, last_name, age, token };
     return res.render(`login`);
   } catch (error) {
     console.log(
@@ -97,29 +119,5 @@ router.post("/update", async (req, res) => {
     );
   }
 });
-
-router.get(
-  "/github",
-  passport.authenticate("github", { scope: ["user:email"] }),
-  async (req, res) => {
-    console.log(`****** USANBO ENDPOINT CON STRATEGIA DE GITHUB *****`);
-  }
-);
-
-router.get(
-  "/github/callback/",
-  passport.authenticate("github", { failureRedirect: "/login" }),
-  async (req, res) => {
-    try {
-      console.log(
-        `****** USANBO ENDPOINT de github/callback PARA COMUNICARNOS *****`
-      );
-      req.session.user = req.user;
-      res.redirect("/profile");
-    } catch (error) {
-      console.log("🚀 ~ file: session.routes.js:115 ~ error:", error);
-    }
-  }
-);
 
 module.exports = router;

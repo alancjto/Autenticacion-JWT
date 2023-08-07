@@ -1,6 +1,12 @@
+const express = require("express");
+const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
+const handlebars = require("express-handlebars");
+const session = require("express-session");
+const displayRoutes = require("express-routemap");
+const viewsRoutes = require("./routes/views.routes");
+const sessionRoutes = require("./routes/session.routes");
 const mongoStore = require("connect-mongo");
-const passport = require("passport");
-const initializePassport = require("./config/passport.config");
 
 const app = express();
 
@@ -26,9 +32,6 @@ app.use(
     saveUninitialized: false,
   })
 );
-// TODO: agregar config de passport
-initializePassport();
-app.use(passport.initialize())
 
 app.engine("handlebars", handlebars.engine());
 app.set("views", __dirname + "/views");

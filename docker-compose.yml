@@ -2,15 +2,15 @@ version: "3.0"
 
 # Services to run
 services:
-  mongo_strategy: # name of BD service
+  mongo_jwt: # name of BD service
     image: mongo
-    container_name: mongo_db_strategy_github
+    container_name: mongo_db_jwt
     ports:
       - 27017:27017
     volumes:
-      - mongostrategy:/data/configdb
-      - mongostrategy:/data/db
+      - mongojwt:/data/configdb
+      - mongojwt:/data/db
     # restart: always
 
 volumes:
-  mongostrategy:
+  mongojwt:
