@@ -7,6 +7,7 @@ const displayRoutes = require("express-routemap");
 const viewsRoutes = require("./routes/views.routes");
 const sessionRoutes = require("./routes/session.routes");
 const mongoStore = require("connect-mongo");
+import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 
@@ -17,6 +18,7 @@ const DB_NAME = "mongoStrategyGithubDB";
 
 const MONGO_URL = `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`;
 
+app.use("/api/users/", userRoutes);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -36,6 +38,7 @@ app.use(
 app.engine("handlebars", handlebars.engine());
 app.set("views", __dirname + "/views");
 app.set("view engine", "handlebars");
+
 
 const connection = mongoose
   .connect(MONGO_URL)
