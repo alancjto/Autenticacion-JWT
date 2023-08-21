@@ -4,12 +4,12 @@ version: "3.0"
 services:
   mongo_strategy: # name of BD service
     image: mongo
-    container_name: mongo_layer_arch_3
+    container_name: node_email
     ports:
       - 27017:27017
     volumes:
-      - mongolayerarch3:/data/configdb
-      - mongolayerarch3:/data/db
+      - mongonodemail:/data/configdb
+      - mongonodemail:/data/db
     restart: always
 
 networks:
@@ -18,4 +18,4 @@ networks:
     driver: bridge
 
 volumes:
-  mongolayerarch3:
+  mongonodemail:

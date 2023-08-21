@@ -8,6 +8,8 @@ const viewsRoutes = require("./routes/views.routes");
 const sessionRoutes = require("./routes/session.routes");
 const mongoStore = require("connect-mongo");
 import userRoutes from "./routes/user.routes.js";
+import emailRoutes from "./routes/email.routes.js";
+import smsRoutes from "./routes/sms.routes.js";
 
 const app = express();
 
@@ -18,6 +20,8 @@ const DB_NAME = "mongoStrategyGithubDB";
 
 const MONGO_URL = `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`;
 
+app.use("/api/email", emailRoutes);
+app.use("/api/sms", smsRoutes);
 app.use("/api/users/", userRoutes);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
